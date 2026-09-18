@@ -1,0 +1,25 @@
+# Base Arch Linux
+base
+base-devel
+linux
+linux-firmware
+
+# Networking
+networkmanager
+
+# Common live-environment tools
+nano
+vim
+git
+sudo
+man-db
+man-pages
+
+# Desktop
+xfce4
+xfce4-goodies
+lightdm
+lightdm-gtk-greeter
+
+# VirtualBox guest support
+virtualbox-guest-utils
