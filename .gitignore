@@ -1,0 +1,8 @@
+out/
+work/
+*.iso
+*.iso.*
+*.img
+*.vdi
+*.vmdk
+*.qcow2
