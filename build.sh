@@ -29,6 +29,9 @@ mkdir -p "$STAGE"
 cp -a "$ARCHISO_RELENG"/. "$STAGE"/
 cp -a "$PROFILE"/. "$STAGE"/
 
+# Avoid carrying a stale pacman cache into the mkarchiso work tree.
+rm -rf "$STAGE/airootfs/var/cache/pacman/pkg/"* 2>/dev/null || true
+
 # yay is an AUR package. If a yay package is supplied in the build
 # environment, the airootfs customization script installs it. This keeps
 # pacman operations out of the outer build environment, where the runner
