@@ -26,3 +26,5 @@ lightdm-gtk-greeter
 
 # VirtualBox guest support
 virtualbox-guest-utils
+fastfetch
+countryfetch
