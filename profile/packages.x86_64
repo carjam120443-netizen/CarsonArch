@@ -1,3 +1,6 @@
+# Boot and base Arch Linux
+syslinux
+
 # Base Arch Linux
 base
 base-devel
