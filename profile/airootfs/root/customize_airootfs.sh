@@ -7,6 +7,9 @@ systemctl enable lightdm.service
 # NetworkManager is already enabled by the releng profile.
 # Do not re-enable it here, which would fail if the symlink already exists.
 
+# Free pacman package-cache space before the extra AUR package is installed.
+rm -rf /var/cache/pacman/pkg/*
+
 # Install the AUR-built yay package into the live environment.
 if [[ -f /root/yay.pkg.tar.zst ]]; then
   pacman -U --noconfirm /root/yay.pkg.tar.zst
