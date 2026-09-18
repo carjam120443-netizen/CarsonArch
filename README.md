@@ -1,5 +1,7 @@
 # CarsonArch
 
+![CarsonArch logo](branding/carsonarch-logo.svg)
+
 A custom Arch Linux distribution built around a clean, reproducible ArchISO profile.
 
 ## Project status
