@@ -41,22 +41,28 @@ jobs:
           test -n "$YAY_PACKAGE"
           echo "YAY_PACKAGE=$YAY_PACKAGE" >> "$GITHUB_ENV"
 
+          # The AUR doas package is optional because opendoas is the
+          # installed CarsonArch implementation. Do not let an unavailable
+          # Codeberg source prevent the ISO from building.
           runuser -u carson-yay -- git clone --depth 1 https://aur.archlinux.org/doas.git /opt/aur/doas
           for attempt in 1 2 3; do
             if runuser -u carson-yay -- bash -c "cd /opt/aur/doas && makepkg --noconfirm --syncdeps"; then
+              DOAS_PACKAGE="$(find /opt/aur/doas -maxdepth 1 -type f -name 'doas-[0-9]*.pkg.tar.zst' -print -quit)"
+              if [ -n "$DOAS_PACKAGE" ]; then
+                echo "DOAS_PACKAGE=$DOAS_PACKAGE" >> "$GITHUB_ENV"
+              fi
               break
             fi
             if [ "$attempt" -eq 3 ]; then
-              echo "AUR doas build failed after 3 attempts." >&2
-              exit 1
+              echo "AUR doas build could not complete; continuing with opendoas."
+              break
             fi
             echo "AUR doas source download failed; retrying in 10 seconds (attempt $((attempt + 1))/3)..."
             sleep 10
             rm -f /opt/aur/doas/doas-*.tar.gz
           done
-          DOAS_PACKAGE="$(find /opt/aur/doas -maxdepth 1 -type f -name 'doas-[0-9]*.pkg.tar.zst' -print -quit)"
-          test -n "$DOAS_PACKAGE"
-          echo "DOAS_PACKAGE=$DOAS_PACKAGE" >> "$GITHUB_ENV"
+        timeout-minutes: 4
+        continue-on-error: true
 
       - name: Build ISO
         run: |
@@ -76,6 +82,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload AUR doas package
+        if: env.DOAS_PACKAGE != ''
         uses: actions/upload-artifact@v4
         with:
           name: carsonarch-aur-doas
