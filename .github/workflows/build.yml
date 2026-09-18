@@ -28,18 +28,24 @@ jobs:
         run: |
           pacman -Syu --noconfirm archiso
 
-      - name: Build yay from the AUR
+      - name: Build yay and AUR doas
         run: |
           pacman -S --needed --noconfirm git base-devel go
           useradd --create-home --shell /bin/bash carson-yay
-          mkdir -p /opt/yay
-          chown -R carson-yay:carson-yay /opt/yay
-          runuser -u carson-yay -- git clone --depth 1 https://aur.archlinux.org/yay.git /opt/yay/src
-          runuser -u carson-yay -- bash -c "cd /opt/yay/src && makepkg --noconfirm --syncdeps"
-          # yay builds a split debug package too; only carry the main package into the ISO.
-          YAY_PACKAGE="$(find /opt/yay/src -maxdepth 1 -type f -name 'yay-[0-9]*.pkg.tar.zst' -print -quit)"
+          mkdir -p /opt/aur
+          chown -R carson-yay:carson-yay /opt/aur
+
+          runuser -u carson-yay -- git clone --depth 1 https://aur.archlinux.org/yay.git /opt/aur/yay
+          runuser -u carson-yay -- bash -c "cd /opt/aur/yay && makepkg --noconfirm --syncdeps"
+          YAY_PACKAGE="$(find /opt/aur/yay -maxdepth 1 -type f -name 'yay-[0-9]*.pkg.tar.zst' -print -quit)"
           test -n "$YAY_PACKAGE"
           echo "YAY_PACKAGE=$YAY_PACKAGE" >> "$GITHUB_ENV"
+
+          runuser -u carson-yay -- git clone --depth 1 https://aur.archlinux.org/doas.git /opt/aur/doas
+          runuser -u carson-yay -- bash -c "cd /opt/aur/doas && makepkg --noconfirm --syncdeps"
+          DOAS_PACKAGE="$(find /opt/aur/doas -maxdepth 1 -type f -name 'doas-[0-9]*.pkg.tar.zst' -print -quit)"
+          test -n "$DOAS_PACKAGE"
+          echo "DOAS_PACKAGE=$DOAS_PACKAGE" >> "$GITHUB_ENV"
 
       - name: Build ISO
         run: |
@@ -56,4 +62,11 @@ jobs:
         with:
           name: carsonarch-iso
           path: out/*.iso
+          if-no-files-found: error
+
+      - name: Upload AUR doas package
+        uses: actions/upload-artifact@v4
+        with:
+          name: carsonarch-aur-doas
+          path: "$DOAS_PACKAGE"
           if-no-files-found: error
