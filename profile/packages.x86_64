@@ -17,14 +17,26 @@ git
 sudo
 man-db
 man-pages
+fastfetch
+countryfetch
+
+# Privilege elevation
+# OpenDoas is the Arch-supported implementation of doas.
+opendoas
 
 # Desktop
+# XFCE remains the default desktop/session.
 xfce4
 xfce4-goodies
 lightdm
 lightdm-gtk-greeter
 
+# Optional GNOME desktop
+gnome
+gnome-shell-extensions
+gnome-extensions-app
+extension-manager
+gnome-tweaks
+
 # VirtualBox guest support
 virtualbox-guest-utils
-fastfetch
-countryfetch
