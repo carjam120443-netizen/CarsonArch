@@ -6,7 +6,6 @@ PROFILE="$SCRIPT_DIR/profile"
 OUT="$SCRIPT_DIR/out"
 WORK="$SCRIPT_DIR/work"
 STAGE="$WORK/profile"
-YAY_BUILD="$WORK/yay-build"
 
 command -v mkarchiso >/dev/null 2>&1 || {
   echo "Error: mkarchiso is required. Install the archiso package first." >&2
@@ -30,22 +29,14 @@ mkdir -p "$STAGE"
 cp -a "$ARCHISO_RELENG"/. "$STAGE"/
 cp -a "$PROFILE"/. "$STAGE"/
 
-# yay is an AUR package, so it cannot be listed in packages.x86_64.
-# Build the current AUR package during the ISO build and install the
-# resulting package into the live environment.
-pacman -Syu --noconfirm git base-devel go
-mkdir -p "$YAY_BUILD"
-useradd --create-home --shell /bin/bash carson-yay
-chown -R carson-yay:carson-yay "$YAY_BUILD"
-runuser -u carson-yay -- git clone --depth 1 https://aur.archlinux.org/yay.git "$YAY_BUILD/yay"
-runuser -u carson-yay -- bash -c "cd '$YAY_BUILD/yay' && makepkg --noconfirm --nodeps"
-YAY_PACKAGE="$(find "$YAY_BUILD/yay" -maxdepth 1 -type f -name 'yay-*.pkg.tar.zst' -print -quit)"
-if [[ -z "$YAY_PACKAGE" ]]; then
-  echo "Error: yay package was not produced by makepkg." >&2
-  exit 1
+# yay is an AUR package. If a yay package is supplied in the build
+# environment, the airootfs customization script installs it. This keeps
+# pacman operations out of the outer build environment, where the runner
+# filesystem can be too small for a full system upgrade.
+if [[ -n "${YAY_PACKAGE:-}" ]]; then
+  install -Dm644 "$YAY_PACKAGE" "$STAGE/airootfs/root/yay.pkg.tar.zst"
+elif [[ -f "$SCRIPT_DIR/yay.pkg.tar.zst" ]]; then
+  install -Dm644 "$SCRIPT_DIR/yay.pkg.tar.zst" "$STAGE/airootfs/root/yay.pkg.tar.zst"
 fi
-cp "$YAY_PACKAGE" "$STAGE/airootfs/root/yay.pkg.tar.zst"
-rm -rf "$YAY_BUILD"
-userdel --remove carson-yay || true
 
 mkarchiso -v -r -w "$WORK/work" -o "$OUT" "$STAGE"
