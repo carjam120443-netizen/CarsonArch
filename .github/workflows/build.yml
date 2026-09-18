@@ -36,7 +36,8 @@ jobs:
           chown -R carson-yay:carson-yay /opt/yay
           runuser -u carson-yay -- git clone --depth 1 https://aur.archlinux.org/yay.git /opt/yay/src
           runuser -u carson-yay -- bash -c "cd /opt/yay/src && makepkg --noconfirm --syncdeps"
-          # yay builds a split debug package too; only carry the main package into the ISO.\n          YAY_PACKAGE="$(find /opt/yay/src -maxdepth 1 -type f -name 'yay-[0-9]*.pkg.tar.zst' -print -quit)"
+          # yay builds a split debug package too; only carry the main package into the ISO.
+          YAY_PACKAGE="$(find /opt/yay/src -maxdepth 1 -type f -name 'yay-[0-9]*.pkg.tar.zst' -print -quit)"
           test -n "$YAY_PACKAGE"
           echo "YAY_PACKAGE=$YAY_PACKAGE" >> "$GITHUB_ENV"
 
