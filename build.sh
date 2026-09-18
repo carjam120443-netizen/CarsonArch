@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROFILE="$SCRIPT_DIR/profile"
 OUT="$SCRIPT_DIR/out"
 WORK="$SCRIPT_DIR/work"
@@ -40,6 +40,16 @@ if [[ -n "${YAY_PACKAGE:-}" ]]; then
   install -Dm644 "$YAY_PACKAGE" "$STAGE/airootfs/root/yay.pkg.tar.zst"
 elif [[ -f "$SCRIPT_DIR/yay.pkg.tar.zst" ]]; then
   install -Dm644 "$SCRIPT_DIR/yay.pkg.tar.zst" "$STAGE/airootfs/root/yay.pkg.tar.zst"
+fi
+
+# The AUR doas package and Arch official opendoas package provide the same
+# doas command and are alternatives, so they must not be installed together.
+# Keep the AUR build available in the live image for testing or manual
+# replacement while opendoas remains the installed default.
+if [[ -n "${DOAS_PACKAGE:-}" ]]; then
+  install -Dm644 "$DOAS_PACKAGE" "$STAGE/airootfs/root/Packages/doas.pkg.tar.zst"
+elif [[ -f "$SCRIPT_DIR/doas.pkg.tar.zst" ]]; then
+  install -Dm644 "$SCRIPT_DIR/doas.pkg.tar.zst" "$STAGE/airootfs/root/Packages/doas.pkg.tar.zst"
 fi
 
 mkarchiso -v -r -w "$WORK/work" -o "$OUT" "$STAGE"
