@@ -34,7 +34,6 @@ lightdm-gtk-greeter
 # Optional GNOME desktop
 gnome
 gnome-shell-extensions
-gnome-extensions-app
 extension-manager
 gnome-tweaks
 
